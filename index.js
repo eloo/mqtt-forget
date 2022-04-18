@@ -18,9 +18,12 @@ const yargs = require('yargs')
         default: 'mqtt://127.0.0.1',
         describe: 'MQTT broker url'
     })
-    .option('f', {
-        alias: 'force',
+    .option('force',{
         describe: 'Remove topics without confirmation'
+    })
+    .option('filter', {
+        alias: 'f',
+        describe: 'Topic must contain this string'
     })
     .usage('Usage: $0 <options>')
     .help()
@@ -68,6 +71,9 @@ function main() {
     ready = true;
     log('found', topics.length, 'retained topic' + (topics.length === 1 ? '' : 's'));
     topics.forEach(topic => {
+        if (yargs.filter && !topic.includes(yargs.filter)) {
+            return;
+        }
         queue.push(cb => {
             if (yargs.force) {
                 remove(topic, cb);
